@@ -1,0 +1,104 @@
+const fs = require('fs');
+
+let code = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && exists(/databases/$(database)/documents/Admin/$(request.auth.uid)) && get(/databases/$(database)/documents/Admin/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /usernames/{username} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /Admin/{adminId} {
+      allow read: if request.auth != null && (request.auth.uid == adminId || isAdmin());
+      allow create, update, delete: if false;
+    }
+
+    match /bots/{botId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerUid;
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.ownerUid || 
+        isAdmin() || 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['averageRating', 'totalRatings', 'totalLikes', 'totalDislikes', 'updatedAt']))
+      );
+      allow delete: if request.auth != null && (request.auth.uid == resource.data.ownerUid || isAdmin());
+
+      match /ratings/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /reactions/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      match /comments/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    match /channels/{channelId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerUid;
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.ownerUid) || (request.auth != null && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']));
+      allow delete: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.ownerUid);      
+    }
+
+    match /referrals/{referralId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /channel_members/{memberId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    match /charts/{chartId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /personal_messages/{msgId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /channel_messages/{msgId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /user_presence/{presenceId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /typing_status/{typingId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /notifications/{notifId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /reports/{reportId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+`;
+
+fs.writeFileSync('firestore.rules', code);
