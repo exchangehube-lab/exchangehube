@@ -5,40 +5,42 @@ const updateUserStatus = async (req, res, next) => {
       const { userId } = req.params;
           const { status } = req.body;
 
-              if (!status) {
-                    return res.status(400).json({
-                            success: false,
-                                    message: "Status is required",
-                                          });
-                                              }
+              const allowedStatuses = ["active", "suspended", "banned"];
 
-                                                  await db.collection("users").doc(userId).update({ status });
+                  if (!allowedStatuses.includes(status)) {
+                        return res.status(400).json({
+                                success: false,
+                                        message: "Invalid user status",
+                                              });
+                                                  }
 
-                                                      res.json({
-                                                            success: true,
-                                                                  message: "User status updated",
-                                                                      });
-                                                                        } catch (error) {
-                                                                            next(error);
-                                                                              }
-                                                                              };
+                                                      await db.collection("users").doc(userId).update({ status });
 
-                                                                              const deleteUser = async (req, res, next) => {
-                                                                                try {
-                                                                                    const { userId } = req.params;
+                                                          res.json({
+                                                                success: true,
+                                                                      message: "User status updated",
+                                                                          });
+                                                                            } catch (error) {
+                                                                                next(error);
+                                                                                  }
+                                                                                  };
 
-                                                                                        await db.collection("users").doc(userId).delete();
+                                                                                  const deleteUser = async (req, res, next) => {
+                                                                                    try {
+                                                                                        const { userId } = req.params;
 
-                                                                                            res.json({
-                                                                                                  success: true,
-                                                                                                        message: "User deleted",
-                                                                                                            });
-                                                                                                              } catch (error) {
-                                                                                                                  next(error);
-                                                                                                                    }
-                                                                                                                    };
+                                                                                            await db.collection("users").doc(userId).delete();
 
-                                                                                                                    module.exports = {
-                                                                                                                      updateUserStatus,
-                                                                                                                        deleteUser,
+                                                                                                res.json({
+                                                                                                      success: true,
+                                                                                                            message: "User deleted",
+                                                                                                                });
+                                                                                                                  } catch (error) {
+                                                                                                                      next(error);
+                                                                                                                        }
                                                                                                                         };
+
+                                                                                                                        module.exports = {
+                                                                                                                          updateUserStatus,
+                                                                                                                            deleteUser,
+                                                                                                                            };
