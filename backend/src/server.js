@@ -6,6 +6,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const botRoutes = require("./routes/botRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const channelRoutes = require("./routes/channelRoutes");
+const errorHandler = require("./middleware/errorHandler");
 const app = express();
 
 app.use(cors());
@@ -21,6 +22,8 @@ app.get("/", (req, res) => {
           message: "ExchangeHub backend is running"
             });
             });
+            
+            app.use(errorHandler);
 
             const PORT = process.env.PORT || 3000;
 
