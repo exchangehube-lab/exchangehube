@@ -4,6 +4,7 @@ require("dotenv").config();
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const botRoutes = require("./routes/botRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 const app = express();
 
 app.use(cors());
@@ -11,6 +12,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/bots", botRoutes);
+app.use("/api/reports", reportRoutes);
 app.get("/", (req, res) => {
   res.json({
       success: true,
