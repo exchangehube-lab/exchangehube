@@ -1,6 +1,7 @@
 const express = require("express");
 const authenticate = require("../middleware/auth");
 const requireAdmin = require("../middleware/admin");
+const { validateId } = require("../middleware/validate");
 const {
   updateReportStatus,
     deleteReport,
@@ -11,7 +12,16 @@ const {
     router.use(authenticate);
     router.use(requireAdmin);
 
-    router.patch("/:reportId/status", updateReportStatus);
-    router.delete("/:reportId", deleteReport);
+    router.patch(
+      "/:reportId/status",
+        validateId("reportId"),
+          updateReportStatus
+          );
 
-    module.exports = router;
+          router.delete(
+            "/:reportId",
+              validateId("reportId"),
+                deleteReport
+                );
+
+                module.exports = router;

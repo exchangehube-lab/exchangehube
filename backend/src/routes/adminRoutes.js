@@ -1,6 +1,7 @@
 const express = require("express");
 const authenticate = require("../middleware/auth");
 const requireAdmin = require("../middleware/admin");
+const { validateId } = require("../middleware/validate");
 const {
   updateUserStatus,
     deleteUser,
@@ -11,7 +12,12 @@ const {
     router.use(authenticate);
     router.use(requireAdmin);
 
-    router.patch("/users/:userId/status", updateUserStatus);
-    router.delete("/users/:userId", deleteUser);
+    router.patch(
+      "/users/:userId/status",
+        validateId("userId"),
+          updateUserStatus
+          );
 
-    module.exports = router;
+          router.delete("/users/:userId", validateId("userId"), deleteUser);
+
+          module.exports = router;
